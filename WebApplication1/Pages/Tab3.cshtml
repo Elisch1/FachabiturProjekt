@@ -1,0 +1,180 @@
+@page
+@model Tab3Model
+@{
+    ViewData["Title"] = "Inventar";
+    var hasCharacter = Model.SelectedCharacter != null;
+}
+
+<!-- Skip Link für Screenreader -->
+<a href="#main-content" class="sr-only sr-only-focusable btn btn-primary position-absolute" style="top: -40px; left: 6px; z-index: 1000;">
+    Zum Hauptinhalt springen
+</a>
+
+<main id="main-content">
+    <!-- Header Section -->
+    <header class="text-center py-4 mb-6" role="banner">
+        <h1>🎒 <span class="sr-only">Inventarverwaltung - </span>Inventar</h1>
+        <p style="color: rgba(251, 191, 36, 0.7); font-size: 1.1rem; margin: 0.5rem 0 0;" aria-describedby="page-description">
+            Wähle einen Charakter aus, um sein Inventar anzusehen und zu bearbeiten.
+        </p>
+        <div id="page-description" class="sr-only">
+            Diese Seite zeigt dir das Inventar des ausgewählten Charakters und ermöglicht das Hinzufügen, Entfernen oder Anpassen von Gegenständen.
+        </div>
+    </header>
+
+    <!-- Character Selection -->
+    <section class="card mb-5" aria-labelledby="character-selection-heading">
+        <div class="card-header">
+            <h2 id="character-selection-heading" class="mb-0 h5">Charakter auswählen</h2>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-8">
+                    <label for="selectedCharacter" class="form-label">Charakter</label>
+                    <select id="selectedCharacter" name="SelectedCharacterId" class="form-select" aria-describedby="character-select-help">
+                        <option value="">-- Charakter wählen --</option>
+                        @foreach (var character in Model.Characters)
+                        {
+                            <option value="@character.Id" selected="@(Model.SelectedCharacterId == character.Id)">
+                                @character.FirstName @character.LastName
+                            </option>
+                        }
+                    </select>
+                    <div id="character-select-help" class="form-text sr-only">
+                        Wähle einen Charakter, um dessen Inventar anzuzeigen.
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary">Auswählen</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    @if (hasCharacter)
+    {
+        <section class="card mb-5" aria-labelledby="inventory-heading">
+            <div class="card-header">
+                <h2 id="inventory-heading" class="mb-0 h5">
+                    Inventar von @Model.SelectedCharacter!.FirstName @Model.SelectedCharacter!.LastName
+                </h2>
+            </div>
+            <div class="card-body">
+                <div asp-validation-summary="All" class="alert alert-danger" role="alert" style="display: @(ViewData.ModelState.IsValid ? "none" : "block");">
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="mb-2">
+                            <strong>Charaktertyp:</strong> @Model.SelectedCharacter.Type
+                        </div>
+                        <div class="mb-2">
+                            <strong>Beschreibung:</strong> @Model.SelectedCharacter.Description ?? "(Keine Beschreibung)"
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        @if (!string.IsNullOrEmpty(Model.SelectedCharacter.ProfileImagePath))
+                        {
+                            <img src="@Model.SelectedCharacter.ProfileImagePath" class="img-thumbnail" alt="Profilbild von @Model.SelectedCharacter.FirstName @Model.SelectedCharacter.LastName" style="max-width: 140px;" />
+                        }
+                    </div>
+                </div>
+
+                @if (Model.SelectedInventory == null || !Model.SelectedInventory.Items.Any())
+                {
+                    <div class="alert alert-info" role="status">
+                        Dieses Inventar ist leer. Füge Gegenstände hinzu, um es zu füllen.
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Gegenstand</th>
+                                    <th scope="col">Beschreibung</th>
+                                    <th scope="col">Menge</th>
+                                    <th scope="col" class="text-end">Aktionen</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var inventoryItem in Model.SelectedInventory.Items)
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong>@inventoryItem.Item?.Name</strong>
+                                            <div class="text-muted" style="font-size: 0.9rem;">
+                                                @inventoryItem.Item?.ItemType?.Name
+                                            </div>
+                                        </td>
+                                        <td style="min-width: 250px;">
+                                            @inventoryItem.Item?.Description
+                                        </td>
+                                        <td style="width: 130px;">
+                                            <form method="post" asp-page-handler="UpdateQuantity" class="d-flex gap-2 align-items-center">
+                                                <input type="hidden" name="SelectedCharacterId" value="@Model.SelectedCharacterId" />
+                                                <input type="hidden" name="itemId" value="@inventoryItem.ItemId" />
+                                                <input type="number" name="quantity" class="form-control" value="@inventoryItem.Quantity" min="0" aria-label="Menge" style="max-width: 110px;" />
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary" title="Menge aktualisieren">
+                                                    ✓
+                                                </button>
+                                            </form>
+                                        </td>
+                                        <td class="text-end">
+                                            <form method="post" asp-page-handler="RemoveItem" class="d-inline">
+                                                <input type="hidden" name="SelectedCharacterId" value="@Model.SelectedCharacterId" />
+                                                <input type="hidden" name="itemId" value="@inventoryItem.ItemId" />
+                                                <button type="submit" class="btn btn-sm btn-danger" title="Gegenstand entfernen">
+                                                    Entfernen
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+
+                <hr />
+
+                <div class="row">
+                    <div class="col-lg-8">
+                        <h3>Gegenstand hinzufügen</h3>
+
+                        @if (!Model.AllItems.Any())
+                        {
+                            <div class="alert alert-info" role="status">
+                                Es sind noch keine Gegenstände vorhanden. Lege zuerst Gegenstände in der Datenbank an, bevor du sie dem Inventar hinzufügen kannst.
+                            </div>
+                        }
+                        else
+                        {
+                            <form method="post" asp-page-handler="AddItem" class="row g-3">
+                                <input type="hidden" name="SelectedCharacterId" value="@Model.SelectedCharacterId" />
+                                <div class="col-md-7">
+                                    <label for="itemSelect" class="form-label">Gegenstand</label>
+                                    <select id="itemSelect" name="SelectedItemId" class="form-select" aria-label="Gegenstand wählen">
+                                        <option value="">-- Gegenstand wählen --</option>
+                                        @foreach (var item in Model.AllItems)
+                                        {
+                                            <option value="@item.Id">@item.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="quantity" class="form-label">Menge</label>
+                                    <input id="quantity" name="Quantity" type="number" class="form-control" value="@Model.Quantity" min="1" />
+                                </div>
+                                <div class="col-md-2 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-success w-100">Hinzufügen</button>
+                                </div>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        </section>
+    }
+</main>

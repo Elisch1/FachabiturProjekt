@@ -1,0 +1,286 @@
+@page
+@model Tab1Model
+@{
+    ViewData["Title"] = "Charaktere";
+    var isEditing = Model.NewCharacter?.Id > 0;
+}
+
+<!-- Skip Link für Screenreader -->
+<a href="#main-content" class="sr-only sr-only-focusable btn btn-primary position-absolute" style="top: -40px; left: 6px; z-index: 1000;">
+    Zum Hauptinhalt springen
+</a>
+
+<main id="main-content">
+    <!-- Header Section -->
+    <header class="text-center py-4 mb-6" role="banner">
+        <h1>⚔️ <span class="sr-only">Charakterverwaltung - </span>Charakterverwaltung</h1>
+        <p style="color: rgba(251, 191, 36, 0.7); font-size: 1.1rem; margin: 0.5rem 0 0;" aria-describedby="page-description">
+            Erstelle und verwalte deine Charaktere
+        </p>
+        <div id="page-description" class="sr-only">
+            Diese Seite ermöglicht es dir, Charaktere für dein Pen-and-Paper-Rollenspiel zu erstellen und zu verwalten.
+        </div>
+    </header>
+
+    <!-- Character Form Card -->
+    <section class="card mb-5" aria-labelledby="form-heading">
+        <div class="card-header">
+            <h2 id="form-heading" class="mb-0 h5">
+                @(isEditing ? "Charakter bearbeiten" : "Neuen Charakter erstellen")
+                <span class="sr-only">@(isEditing ? " - Bearbeitungsmodus" : " - Erstellungsmodus")</span>
+            </h2>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data" aria-describedby="form-description">
+                <div id="form-description" class="sr-only">
+                    Fülle das Formular aus, um @(isEditing ? "einen bestehenden Charakter zu bearbeiten" : "einen neuen Charakter zu erstellen").
+                    Alle Felder mit Sternchen sind Pflichtfelder.
+                </div>
+
+                @if (isEditing)
+                {
+                    <input type="hidden" name="NewCharacter.Id" value="@Model.NewCharacter.Id" aria-hidden="true" />
+                }
+
+                <!-- Basic Info Row -->
+                <fieldset class="mb-4">
+                    <legend class="sr-only">Grundlegende Charakterinformationen</legend>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="newCharacter_FirstName" class="form-label">
+                                    <span aria-hidden="true">👤</span> Vorname <span class="text-danger" aria-label="erforderlich">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="newCharacter_FirstName"
+                                       name="NewCharacter.FirstName" value="@Model.NewCharacter?.FirstName"
+                                       placeholder="z.B. Aragorn" required
+                                       aria-describedby="firstname-help" />
+                                <div id="firstname-help" class="form-text sr-only">
+                                    Gib den Vornamen deines Charakters ein. Dieses Feld ist erforderlich.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="newCharacter_LastName" class="form-label">
+                                    <span aria-hidden="true">👤</span> Nachname <span class="text-danger" aria-label="erforderlich">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="newCharacter_LastName"
+                                       name="NewCharacter.LastName" value="@Model.NewCharacter?.LastName"
+                                       placeholder="z.B. Strider" required
+                                       aria-describedby="lastname-help" />
+                                <div id="lastname-help" class="form-text sr-only">
+                                    Gib den Nachnamen deines Charakters ein. Dieses Feld ist erforderlich.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Age and Type Info Row -->
+                <fieldset class="mb-4">
+                    <legend class="sr-only">Zusätzliche Charakterdetails</legend>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="newCharacter_Age" class="form-label">
+                                    <span aria-hidden="true">📅</span> Alter
+                                </label>
+                                <input type="number" class="form-control" id="newCharacter_Age"
+                                       name="NewCharacter.Age" value="@Model.NewCharacter?.Age"
+                                       min="1" placeholder="z.B. 30"
+                                       aria-describedby="age-help" />
+                                <div id="age-help" class="form-text sr-only">
+                                    Gib das Alter deines Charakters in Jahren ein. Optional.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="newCharacter_Type" class="form-label">
+                                    <span aria-hidden="true">⚔️</span> Charaktertyp
+                                </label>
+                                <select class="form-select" id="newCharacter_Type" name="NewCharacter.Type"
+                                        aria-describedby="type-help">
+                                    <option value="">-- Wähle einen Typ --</option>
+                                    <option value="Player" selected="@(Model.NewCharacter?.Type.ToString() == "Player")">Spielercharakter</option>
+                                    <option value="NPC" selected="@(Model.NewCharacter?.Type.ToString() == "NPC")">NPC (Nicht-Spieler-Charakter)</option>
+                                    <option value="Enemy" selected="@(Model.NewCharacter?.Type.ToString() == "Enemy")">Gegner</option>
+                                </select>
+                                <div id="type-help" class="form-text sr-only">
+                                    Wähle den Typ deines Charakters aus der Liste.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Description -->
+                <div class="mb-4">
+                    <label for="newCharacter_Description" class="form-label">
+                        <span aria-hidden="true">📝</span> Beschreibung
+                    </label>
+                    <textarea class="form-control" id="newCharacter_Description"
+                              name="NewCharacter.Description" rows="4"
+                              placeholder="Beschreibe deinen Charakter..."
+                              aria-describedby="description-help">@Model.NewCharacter?.Description</textarea>
+                    <div id="description-help" class="form-text sr-only">
+                        Gib eine optionale Beschreibung deines Charakters ein.
+                    </div>
+                </div>
+
+                <!-- Profile Image -->
+                <fieldset class="mb-4">
+                    <legend class="form-label">
+                        <span aria-hidden="true">🖼️</span> Profilbild
+                    </legend>
+                    <div class="input-group">
+                        <input type="file" class="form-control" name="UploadImage" accept="image/*"
+                               placeholder="Bild hochladen" aria-describedby="image-help image-format" />
+                        <span class="input-group-text" id="image-format" style="background: rgba(217, 119, 6, 0.1); border-color: var(--border-color);">
+                            Nur Bilder
+                        </span>
+                    </div>
+                    <div id="image-help" class="form-text sr-only">
+                        Optional: Lade ein Profilbild für deinen Charakter hoch. Akzeptierte Formate: Bilder.
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.NewCharacter?.ProfileImagePath))
+                    {
+                        <div class="mt-3" role="img" aria-label="Aktuelles Profilbild des Charakters">
+                            <img src="@Model.NewCharacter.ProfileImagePath" alt="Aktuelles Profilbild von @(Model.NewCharacter?.FirstName) @(Model.NewCharacter?.LastName)"
+                                 class="img-thumbnail" style="max-width: 150px; max-height: 150px;" />
+                        </div>
+                    }
+                </fieldset>
+
+                <!-- Submit Buttons -->
+                <div class="btn-group" role="group" aria-label="Formularaktionen">
+                    <button type="submit" class="btn btn-success" aria-describedby="submit-help">
+                        <span aria-hidden="true">@(isEditing ? "✓" : "✓")</span>
+                        @(isEditing ? "Änderungen speichern" : "Charakter erstellen")
+                    </button>
+                    @if (isEditing)
+                    {
+                        <a href="/Tab1" class="btn btn-secondary" aria-describedby="cancel-help">
+                            <span aria-hidden="true">✕</span> Abbrechen
+                        </a>
+                    }
+                </div>
+                <div id="submit-help" class="sr-only">
+                    Klicke hier, um @(isEditing ? "die Änderungen zu speichern" : "den neuen Charakter zu erstellen").
+                </div>
+                <div id="cancel-help" class="sr-only">
+                    Klicke hier, um die Bearbeitung abzubrechen und zur Übersicht zurückzukehren.
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Existing Characters Section -->
+    <section aria-labelledby="characters-heading">
+        <h2 id="characters-heading">
+            <span aria-hidden="true">📚</span> Vorhandene Charaktere
+            <span class="badge bg-secondary ms-2" aria-label="@Model.Characters.Count Charaktere">@Model.Characters.Count</span>
+        </h2>
+
+        @if (Model.Characters.Any())
+        {
+            <div class="row g-4" role="list" aria-label="Liste aller Charaktere">
+                @foreach (var character in Model.Characters)
+                {
+                    <div class="col-lg-6 col-xl-4" role="listitem">
+                        <article class="card h-100" style="position: relative;overflow: hidden;">
+                            <!-- Card Background Gradient -->
+                            <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #fbbf24, #f59e0b);" aria-hidden="true"></div>
+
+                            <div class="card-body d-flex flex-column">
+                                <!-- Profile Image -->
+                                <div class="text-center mb-3">
+                                    @if (!string.IsNullOrEmpty(character.ProfileImagePath))
+                                    {
+                                        <img src="@character.ProfileImagePath" alt="Profilbild von @character.FirstName @character.LastName"
+                                             class="img-thumbnail rounded-circle"
+                                             style="max-width: 100px; max-height: 100px; border: 3px solid #fbbf24;" />
+                                    }
+                                    else
+                                    {
+                                        <div style="width: 100px; height: 100px; margin: 0 auto; background: rgba(217, 119, 6, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #fbbf24;" role="img" aria-label="Kein Profilbild vorhanden">
+                                            <span style="font-size: 2rem;" aria-hidden="true">👤</span>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Character Info -->
+                                <header class="text-center mb-2">
+                                    <h3 class="card-title h5 mb-0">
+                                        <span style="color: #fbbf24;">@character.FirstName @character.LastName</span>
+                                    </h3>
+                                </header>
+
+                                <div class="mb-3" role="region" aria-labelledby="char-info-@character.Id">
+                                    <p id="char-info-@character.Id" class="sr-only">Details zu @character.FirstName @character.LastName:</p>
+                                    <p class="mb-1">
+                                        <span class="sr-only">Charaktertyp: </span>
+                                        <span aria-hidden="true" style="color: #fbbf24;">🎭 Typ:</span>
+                                        <span class="badge bg-info ms-1">@character.Type</span>
+                                    </p>
+                                    @if (character.Age > 0)
+                                    {
+                                        <p class="mb-1">
+                                            <span class="sr-only">Alter: @character.Age Jahre. </span>
+                                            <span aria-hidden="true" style="color: #fbbf24;">📅 Alter:</span>
+                                            <span class="ms-1">@character.Age Jahre</span>
+                                        </p>
+                                    }
+                                    @if (!string.IsNullOrEmpty(character.Description))
+                                    {
+                                        <div class="mb-1">
+                                            <span class="sr-only">Beschreibung: @character.Description</span>
+                                            <span aria-hidden="true" style="color: #fbbf24;">📝 Beschreibung:</span><br/>
+                                            <small style="color: rgba(226, 232, 240, 0.8);" aria-hidden="true">@character.Description</small>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="btn-group mt-auto" role="group" aria-label="Aktionen für @character.FirstName @character.LastName" style="gap: 0.5rem;">
+                                    <a href="/Tab1?handler=Edit&id=@character.Id" class="btn btn-sm btn-warning flex-grow-1"
+                                       aria-describedby="edit-help-@character.Id">
+                                        <span aria-hidden="true">✎</span> Bearbeiten
+                                    </a>
+                                    <form method="post" class="flex-grow-1" onsubmit="return confirm('Charakter wirklich löschen?');">
+                                        <button type="submit" asp-page-handler="Delete" asp-route-id="@character.Id"
+                                                class="btn btn-sm btn-danger w-100"
+                                                aria-describedby="delete-help-@character.Id">
+                                            <span aria-hidden="true">🗑️</span> Löschen
+                                        </button>
+                                    </form>
+                                </div>
+                                <div id="edit-help-@character.Id" class="sr-only">
+                                    Bearbeite die Details von @character.FirstName @character.LastName
+                                </div>
+                                <div id="delete-help-@character.Id" class="sr-only">
+                                    Lösche den Charakter @character.FirstName @character.LastName unwiderruflich
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert" role="alert" aria-live="polite" style="text-align: center;">
+                <p style="margin: 0; font-size: 1.1rem;">
+                    <span aria-hidden="true">✨</span> Noch keine Charaktere vorhanden.
+                </p>
+                <p style="margin: 0.5rem 0 0; color: rgba(226, 232, 240, 0.7);" aria-describedby="empty-help">
+                    Erstelle oben einen neuen Charakter, um zu starten!
+                </p>
+                <div id="empty-help" class="sr-only">
+                    Verwende das Formular oben auf dieser Seite, um deinen ersten Charakter zu erstellen.
+                </div>
+            </div>
+        }
+    </section>
+</main>

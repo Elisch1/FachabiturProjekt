@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Pen and Paper Management</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/modern-theme-accessible.css" />
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="/">
+        <img src="~/images/logo.png" alt="Logo" class="img-fluid" style="max-height: 80px;" class="me-2" />
+          Pen and Paper Management
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" asp-page="/Index">Startseite</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" asp-page="/Tab1">Charaktere</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" asp-page="/Tab2">Kampf</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" asp-page="/Tab3">Inventar</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" asp-page="/Tab4">Welt</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" asp-page="/Tab5">Einstellungen</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container mt-5">
+        @RenderBody()
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
