@@ -13,6 +13,19 @@ namespace WebApplication1.Models
         public string? Description { get; set; }
         public string? Image { get; set; }
 
+        // Level and Attributes
+        public int Level { get; set; } = 1;
+        public int MaxLevel { get; set; } = 10; // Default max level, can be set from DB or config
+        public int Strength { get; set; } // Kraft
+        public int Precision { get; set; } // Präzision
+        public int Agility { get; set; } // Beweglichkeit
+        public int Intelligence { get; set; } // Intelligenz
+        public int Perception { get; set; } // Wahrnehmung
+        public string? CustomAttribute1Name { get; set; }
+        public int CustomAttribute1Value { get; set; }
+        public string? CustomAttribute2Name { get; set; }
+        public int CustomAttribute2Value { get; set; }
+
         // foreign keys
         public int? VolkId { get; set; }
         public Volk? Volk { get; set; }

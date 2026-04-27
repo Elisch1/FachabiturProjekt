@@ -49,6 +49,7 @@ namespace WebApplication1.Pages
             {
                 // Create
                 NewCharacter.Type = CharacterType.Player;
+                NewCharacter.Level = 1; // Start level
                 _db.Characters.Add(NewCharacter);
             }
             else
@@ -61,6 +62,17 @@ namespace WebApplication1.Pages
                     existing.LastName = NewCharacter.LastName;
                     existing.Age = NewCharacter.Age;
                     existing.Description = NewCharacter.Description;
+                    existing.Level = NewCharacter.Level;
+                    existing.MaxLevel = NewCharacter.MaxLevel;
+                    existing.Strength = NewCharacter.Strength;
+                    existing.Precision = NewCharacter.Precision;
+                    existing.Agility = NewCharacter.Agility;
+                    existing.Intelligence = NewCharacter.Intelligence;
+                    existing.Perception = NewCharacter.Perception;
+                    existing.CustomAttribute1Name = NewCharacter.CustomAttribute1Name;
+                    existing.CustomAttribute1Value = NewCharacter.CustomAttribute1Value;
+                    existing.CustomAttribute2Name = NewCharacter.CustomAttribute2Name;
+                    existing.CustomAttribute2Value = NewCharacter.CustomAttribute2Value;
                     _db.Characters.Update(existing);
                 }
             }

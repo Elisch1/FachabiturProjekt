@@ -10,16 +10,16 @@ builder.Services.AddRazorPages();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+// More funcitons and infos at OpenAPI at https://aka.ms/aspnet/openapi (This is a Reminder for you Elias)
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// create database if it doesn't exist
+// apply pending EF Core migrations and create database if it doesn't exist
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated();
+    db.Database.Migrate();
 }
 
 // Configure the HTTP request pipeline.

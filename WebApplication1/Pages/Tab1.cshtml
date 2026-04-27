@@ -2,7 +2,7 @@
 @model Tab1Model
 @{
     ViewData["Title"] = "Charaktere";
-    var isEditing = Model.NewCharacter?.Id > 0;
+    var isEditing = (Model.NewCharacter?.Id ?? 0) > 0;
 }
 
 <!-- Skip Link für Screenreader -->
@@ -39,8 +39,9 @@
 
                 @if (isEditing)
                 {
-                    <input type="hidden" name="NewCharacter.Id" value="@Model.NewCharacter.Id" aria-hidden="true" />
+                    <input type="hidden" name="NewCharacter.Id" value="@(Model.NewCharacter?.Id ?? 0)" aria-hidden="true" />
                 }
+                <input type="hidden" name="NewCharacter.Level" value="@(Model.NewCharacter?.Level ?? 1)" />
 
                 <!-- Basic Info Row -->
                 <fieldset class="mb-4">
@@ -128,6 +129,46 @@
                         Gib eine optionale Beschreibung deines Charakters ein.
                     </div>
                 </div>
+
+                <!-- Attributes Section -->
+                <fieldset class="mb-4">
+                    <legend class="form-label">
+                        <span aria-hidden="true">⚡</span> Attribute
+                    </legend>
+                    <p class="form-text">Verteile <span id="total-points">20</span> Punkte auf die Attribute. Verbleibende Punkte: <span id="remaining-points">20</span></p>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="strength" class="form-label">Kraft</label>
+                            <input type="number" class="form-control attribute-input" id="strength" name="NewCharacter.Strength" value="@Model.NewCharacter?.Strength" min="0" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="precision" class="form-label">Präzision</label>
+                            <input type="number" class="form-control attribute-input" id="precision" name="NewCharacter.Precision" value="@Model.NewCharacter?.Precision" min="0" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="agility" class="form-label">Beweglichkeit</label>
+                            <input type="number" class="form-control attribute-input" id="agility" name="NewCharacter.Agility" value="@Model.NewCharacter?.Agility" min="0" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="intelligence" class="form-label">Intelligenz</label>
+                            <input type="number" class="form-control attribute-input" id="intelligence" name="NewCharacter.Intelligence" value="@Model.NewCharacter?.Intelligence" min="0" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="perception" class="form-label">Wahrnehmung</label>
+                            <input type="number" class="form-control attribute-input" id="perception" name="NewCharacter.Perception" value="@Model.NewCharacter?.Perception" min="0" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="custom1-name" class="form-label">Freies Attribut 1</label>
+                            <input type="text" class="form-control" id="custom1-name" name="NewCharacter.CustomAttribute1Name" value="@Model.NewCharacter?.CustomAttribute1Name" placeholder="Name" />
+                            <input type="number" class="form-control attribute-input mt-1" id="custom1-value" name="NewCharacter.CustomAttribute1Value" value="@Model.NewCharacter?.CustomAttribute1Value" min="0" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="custom2-name" class="form-label">Freies Attribut 2</label>
+                            <input type="text" class="form-control" id="custom2-name" name="NewCharacter.CustomAttribute2Name" value="@Model.NewCharacter?.CustomAttribute2Name" placeholder="Name" />
+                            <input type="number" class="form-control attribute-input mt-1" id="custom2-value" name="NewCharacter.CustomAttribute2Value" value="@Model.NewCharacter?.CustomAttribute2Value" min="0" />
+                        </div>
+                    </div>
+                </fieldset>
 
                 <!-- Profile Image -->
                 <fieldset class="mb-4">
@@ -232,6 +273,26 @@
                                             <span class="ms-1">@character.Age Jahre</span>
                                         </p>
                                     }
+                                    <p class="mb-1">
+                                        <span class="sr-only">Level: @character.Level. </span>
+                                        <span aria-hidden="true" style="color: #fbbf24;">⭐ Level:</span>
+                                        <span class="ms-1">@character.Level</span>
+                                    </p>
+                                    <div class="mb-1">
+                                        <span aria-hidden="true" style="color: #fbbf24;">⚡ Attribute:</span><br/>
+                                        <small style="color: rgba(226, 232, 240, 0.8);">
+                                            Kraft: @character.Strength, Präzision: @character.Precision, Beweglichkeit: @character.Agility,<br/>
+                                            Intelligenz: @character.Intelligence, Wahrnehmung: @character.Perception
+                                            @if (!string.IsNullOrEmpty(character.CustomAttribute1Name))
+                                            {
+                                                @: <br/>@character.CustomAttribute1Name: @character.CustomAttribute1Value
+                                            }
+                                            @if (!string.IsNullOrEmpty(character.CustomAttribute2Name))
+                                            {
+                                                @: <br/>@character.CustomAttribute2Name: @character.CustomAttribute2Value
+                                            }
+                                        </small>
+                                    </div>
                                     @if (!string.IsNullOrEmpty(character.Description))
                                     {
                                         <div class="mb-1">
@@ -284,3 +345,40 @@
         }
     </section>
 </main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const attributeInputs = document.querySelectorAll('.attribute-input');
+        const remainingPointsSpan = document.getElementById('remaining-points');
+        const totalPointsSpan = document.getElementById('total-points');
+        const levelInput = document.querySelector('input[name="NewCharacter.Level"]');
+        let level = parseInt(levelInput.value) || 1;
+        let totalPoints = 20 + (level - 1) * 3;
+
+        totalPointsSpan.textContent = totalPoints;
+
+        function updateRemainingPoints() {
+            let sum = 0;
+            attributeInputs.forEach(input => {
+                sum += parseInt(input.value) || 0;
+            });
+            remainingPointsSpan.textContent = totalPoints - sum;
+            remainingPointsSpan.style.color = (totalPoints - sum) < 0 ? 'red' : 'inherit';
+        }
+
+        attributeInputs.forEach(input => {
+            input.addEventListener('input', updateRemainingPoints);
+        });
+
+        // If level changes (though hidden, but for future)
+        levelInput.addEventListener('input', function() {
+            level = parseInt(this.value) || 1;
+            totalPoints = 20 + (level - 1) * 3;
+            totalPointsSpan.textContent = totalPoints;
+            updateRemainingPoints();
+        });
+
+        // Initial calculation
+        updateRemainingPoints();
+    });
+</script>

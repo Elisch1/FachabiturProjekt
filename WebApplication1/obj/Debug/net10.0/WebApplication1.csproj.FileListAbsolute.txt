@@ -151,3 +151,4 @@ C:\Users\schmi\Documents\Abschlussprojekt\WebApplication1\bin\Debug\net10.0\runt
 C:\Users\schmi\Documents\Abschlussprojekt\WebApplication1\bin\Debug\net10.0\WebApplication1.staticwebassets.runtime.json
 C:\Users\schmi\Documents\Abschlussprojekt\WebApplication1\obj\Debug\net10.0\compressed\mrkf0z2m6w-{0}-rt6h1c9xda-rt6h1c9xda.gz
 C:\Users\schmi\Documents\Abschlussprojekt\WebApplication1\obj\Debug\net10.0\compressed\72mspzmo8x-{0}-g568o7335p-g568o7335p.gz
+C:\Users\schmi\Documents\Abschlussprojekt\WebApplication1\obj\Debug\net10.0\WebApplication1.sourcelink.json
