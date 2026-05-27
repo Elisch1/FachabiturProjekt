@@ -1,0 +1,340 @@
+@page
+@model Tab2Model
+@{
+    ViewData["Title"] = "Kampf";
+}
+
+<!-- Skip Link für Screenreader -->
+<a href="#main-content" class="sr-only sr-only-focusable btn btn-primary position-absolute" style="top: -40px; left: 6px; z-index: 1000;">
+    Zum Hauptinhalt springen
+</a>
+
+<main id="main-content">
+    <!-- Header Section -->
+    <header class="text-center py-4 mb-6" role="banner">
+        <h1>⚔️ <span class="sr-only">Kampfsystem - </span>Mehrspielerkampf (2-5 Charaktere)</h1>
+        <p style="color: rgba(251, 191, 36, 0.7); font-size: 1.1rem; margin: 0.5rem 0 0;" aria-describedby="page-description">
+            Lass bis zu 5 Charaktere gegeneinander kämpfen mit d20 Würfeln
+        </p>
+        <div id="page-description" class="sr-only">
+            Wähle 2-5 unterschiedliche Charaktere aus und führe einen interaktiven Kampf durch.
+        </div>
+    </header>
+
+    <!-- Battle Selection Section -->
+    @if (Model.CurrentBattle == null)
+    {
+        <section class="card mb-5" aria-labelledby="battle-selection-heading">
+            <div class="card-header">
+                <h2 id="battle-selection-heading" class="mb-0 h5">
+                    <span aria-hidden="true">🎭</span> 2-5 Charaktere für Kampf auswählen
+                </h2>
+            </div>
+            <div class="card-body">
+                <form method="post" asp-page-handler="StartBattle">
+                    <div asp-validation-summary="All" class="alert alert-danger" role="alert"
+                         style="display: @(ViewData.ModelState.IsValid ? "none" : "block");"></div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Wähle 2–5 Charaktere für den Kampf</label>
+                        <div id="char-help" class="form-text mb-3">
+                            Mindestens 2, höchstens 5 Charaktere auswählen.
+                        </div>
+                        <div class="small mb-2" aria-live="polite">
+                            Ausgewählt: <strong id="countDisplay">0</strong> / 5
+                        </div>
+
+                        <div class="row g-2" id="charCheckboxGrid">
+                            @foreach (var character in Model.Characters)
+                            {
+                                <div class="col-lg-4 col-md-6">
+                                    <label class="char-card d-flex align-items-center gap-2 p-3 rounded border"
+                                           style="cursor: pointer; transition: all 0.15s;"
+                                           for="char_@character.Id">
+                                        <input type="checkbox"
+                                               id="char_@character.Id"
+                                               name="SelectedCharacterIds"
+                                               value="@character.Id"
+                                               class="char-checkbox form-check-input mt-0"
+                                               aria-describedby="char-help" />
+                                        <div class="flex-grow-1">
+                                            <div class="fw-semibold">@character.FirstName @character.LastName</div>
+                                            <small class="text-muted">Level @character.Level</small>
+                                        </div>
+                                        <span class="badge bg-secondary">Lv @character.Level</span>
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg" id="startBattleBtn" disabled>
+                            <span aria-hidden="true">⚔️</span> Kampf starten
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    }
+    else
+    {
+        <!-- Active Battle Section -->
+        <section class="card mb-5" aria-labelledby="active-battle-heading">
+            <div class="card-header" style="background: linear-gradient(90deg, rgba(251, 191, 36, 0.2), rgba(239, 68, 68, 0.2));">
+                <h2 id="active-battle-heading" class="mb-0 h5">
+                    <span aria-hidden="true">⚔️</span> Aktiver Kampf
+                </h2>
+            </div>
+            <div class="card-body">
+
+                <!-- Character Status Grid -->
+                <div class="row g-3 mb-4">
+                    @foreach (var teilnehmer in Model.CurrentBattle.Teilnehmer.OrderByDescending(t => t.Initiative))
+                    {
+                        var isActive = Model.CurrentAttacker?.CharacterId == teilnehmer.CharacterId;
+                        <div class="col-lg-4 col-md-6">
+                            <div class="card @(isActive ? "border-warning border-2" : "")" style="@(isActive ? "background: rgba(251, 191, 36, 0.05);" : "")">
+                                <div class="card-body">
+                                    <h5 class="card-title @(isActive ? "text-warning fw-bold" : "")">
+                                        @if (isActive)
+                                        {
+                                            <span aria-hidden="true">👉</span>
+                                        }
+                                        @teilnehmer.Character?.FirstName
+                                    </h5>
+                                    <div class="small">
+                                        <div><strong>Initiative:</strong> @teilnehmer.Initiative</div>
+                                        <div>
+                                            <strong>HP:</strong>
+                                            <span style="color: @(teilnehmer.CurrentHp > 50 ? "#10b981" : teilnehmer.CurrentHp > 0 ? "#f59e0b" : "#ef4444");">
+                                                @teilnehmer.CurrentHp / 100
+                                            </span>
+                                        </div>
+                                        <div class="progress mt-2" style="height: 8px;">
+                                            <div class="progress-bar @(teilnehmer.CurrentHp > 50 ? "bg-success" : teilnehmer.CurrentHp > 0 ? "bg-warning" : "bg-danger")"
+                                                 style="width: @(Math.Max(0, teilnehmer.CurrentHp))%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                @if (Model.CurrentBattle.Status == WebApplication1.Models.KampfStatus.Aktiv)
+                {
+                    @if (Model.CurrentBattle.Logs == null || !Model.CurrentBattle.Logs.Any())
+                    {
+                        <!-- ===== INITIATIVE PHASE ===== -->
+                        <section class="card mb-4" aria-labelledby="init-heading">
+                            <div class="card-header">
+                                <h3 id="init-heading" class="mb-0 h5">
+                                    <span aria-hidden="true">🎲</span> Phase 1: Initiative-Bestimmung
+                                </h3>
+                            </div>
+                            <div class="card-body">
+
+                                <!-- Automatisch würfeln -->
+                                <p class="text-muted small mb-3">
+                                    Klicke auf "Automatisch würfeln" um für alle Teilnehmer einen d20 zu würfeln.
+                                    Oder gib die Würfelergebnisse manuell ein.
+                                </p>
+
+                                <form method="post" asp-page-handler="RollInitiative" class="mb-4">
+                                    <input type="hidden" name="BattleId" value="@Model.CurrentBattle.Id" />
+                                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                                        <span aria-hidden="true">🎲</span> Automatisch würfeln (für alle)
+                                    </button>
+                                </form>
+
+                                <!-- Trennlinie -->
+                                <div class="d-flex align-items-center gap-3 mb-4">
+                                    <hr class="flex-grow-1 m-0" />
+                                    <span class="text-muted small">oder manuell eingeben</span>
+                                    <hr class="flex-grow-1 m-0" />
+                                </div>
+
+                                <!-- Manuell eingeben -->
+                                <form method="post" asp-page-handler="RollInitiativeManual">
+                                    <input type="hidden" name="BattleId" value="@Model.CurrentBattle.Id" />
+
+                                    <div class="row g-3 mb-3">
+                                        @foreach (var teilnehmer in Model.CurrentBattle.Teilnehmer)
+                                        {
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">
+                                                    @teilnehmer.Character?.FirstName @teilnehmer.Character?.LastName
+                                                    <small class="text-muted fw-normal">(+ @((teilnehmer.Character?.Agility ?? 0) / 3) Agilität-Bonus)</small>
+                                                </label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">🎲</span>
+                                                    <input type="number"
+                                                           name="ManualInitiatives[@teilnehmer.CharacterId]"
+                                                           class="form-control form-control-lg"
+                                                           min="1" max="20"
+                                                           placeholder="1–20"
+                                                           required />
+                                                </div>
+                                                <div class="form-text">d20-Wurf für @teilnehmer.Character?.FirstName</div>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <button type="submit" class="btn btn-outline-primary btn-lg w-100">
+                                        <span aria-hidden="true">✅</span> Manuelle Initiative bestätigen
+                                    </button>
+                                </form>
+
+                            </div>
+                        </section>
+                    }
+                    else
+                    {
+                        <!-- ===== KAMPF PHASE ===== -->
+                        <div class="alert alert-info mb-4" role="status">
+                            <h5>Phase 2: Kampf - Zug @(Model.CurrentAttackerIndex + 1)</h5>
+                            <p class="mb-0">
+                                <strong>Angreifer:</strong> @Model.CurrentAttacker?.Character?.FirstName<br />
+                                Wähle einen Verteidiger und gib deine Würfelergebnisse ein (1-20).
+                            </p>
+                        </div>
+
+                        <form method="post" asp-page-handler="Attack" class="card card-body bg-light mb-4">
+                            <input type="hidden" name="BattleId" value="@Model.CurrentBattle.Id" />
+                            <input type="hidden" name="CurrentAttackerIndex" value="@Model.CurrentAttackerIndex" />
+
+                            <div class="row g-3 mb-4">
+                                <!-- Defender Selection -->
+                                <div class="col-md-6">
+                                    <label for="defenderSelect" class="form-label fw-bold">Wähle einen Verteidiger</label>
+                                    <select id="defenderSelect" name="SelectedDefenderId" class="form-select form-select-lg" required>
+                                        <option value="">-- Verteidiger wählen --</option>
+                                        @foreach (var teilnehmer in Model.CurrentBattle.Teilnehmer.Where(t => t.CharacterId != Model.CurrentAttacker?.CharacterId && t.CurrentHp > 0))
+                                        {
+                                            <option value="@teilnehmer.CharacterId">
+                                                @teilnehmer.Character?.FirstName (@teilnehmer.CurrentHp HP)
+                                            </option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <!-- Attack Roll -->
+                                <div class="col-md-6">
+                                    <label for="attackRoll" class="form-label fw-bold">Dein Angriffswurf (d20)</label>
+                                    <input type="number" id="attackRoll" name="AttackRoll" class="form-control form-control-lg"
+                                           min="1" max="20" required aria-describedby="attack-help" placeholder="1-20">
+                                    <div id="attack-help" class="form-text">Würfele 1d20 für deinen Angriff</div>
+                                </div>
+
+                                <!-- Defense Roll -->
+                                <div class="col-md-6">
+                                    <label for="defenseRoll" class="form-label fw-bold">Gegners Abwehrwurf (d20)</label>
+                                    <input type="number" id="defenseRoll" name="DefenseRoll" class="form-control form-control-lg"
+                                           min="1" max="20" required aria-describedby="defense-help" placeholder="1-20">
+                                    <div id="defense-help" class="form-text">Würfele 1d20 für die Abwehr</div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <span aria-hidden="true">⚔️</span> Angriff ausführen
+                                </button>
+                            </div>
+                        </form>
+                    }
+                }
+                else if (Model.CurrentBattle.Status == WebApplication1.Models.KampfStatus.Beendet)
+                {
+                    <!-- Battle Ended -->
+                    <section class="card mb-5" style="border-color: #10b981; border-width: 2px;">
+                        <div class="card-header bg-success">
+                            <h2 class="mb-0 h5 text-white">
+                                <span aria-hidden="true">🏆</span> Kampf beendet!
+                            </h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-success" role="status">
+                                Der Kampf ist vorbei. Hier sind die Überlebenden:
+                            </div>
+                            <ul class="list-group mb-4">
+                                @foreach (var teilnehmer in Model.CurrentBattle.Teilnehmer.Where(t => t.CurrentHp > 0))
+                                {
+                                    <li class="list-group-item">
+                                        <span style="color: #10b981; font-weight: bold;">✓</span>
+                                        @teilnehmer.Character?.FirstName
+                                        <span class="badge bg-success">@teilnehmer.CurrentHp / 100 HP</span>
+                                    </li>
+                                }
+                            </ul>
+                            <div class="text-center">
+                                <a href="@Url.Page("/Tab2")" class="btn btn-primary btn-lg">
+                                    <span aria-hidden="true">⚔️</span> Neuer Kampf
+                                </a>
+                            </div>
+                        </div>
+                    </section>
+                }
+
+                <!-- Battle Log -->
+                <div class="mt-4">
+                    <h3 class="mb-3">📜 Kampfverlauf</h3>
+                    <div class="border rounded p-3" style="max-height: 300px; overflow-y: auto; background: rgba(0,0,0,0.02);">
+                        @if (Model.CurrentBattle.Logs != null && Model.CurrentBattle.Logs.Any())
+                        {
+                            @foreach (var log in Model.CurrentBattle.Logs.OrderByDescending(l => l.Id))
+                            {
+                                <div class="mb-2 p-2 border-bottom small">
+                                    <strong style="color: #fbbf24;">@log.Timestamp.ToString("HH:mm:ss")</strong>
+                                    <p class="mb-0">@log.Nachricht</p>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0">Kein Kampfverlauf vorhanden</p>
+                        }
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    }
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // ── Checkbox-Auswahl für Kampfstart ──────────────────────────────
+        function updateCharCount() {
+            const checked = document.querySelectorAll('.char-checkbox:checked');
+            const count = checked.length;
+
+            const display = document.getElementById('countDisplay');
+            if (display) display.textContent = count;
+
+            const btn = document.getElementById('startBattleBtn');
+            if (btn) btn.disabled = count < 2 || count > 5;
+
+            // Nicht-ausgewählte Checkboxen sperren wenn 5 erreicht
+            document.querySelectorAll('.char-checkbox').forEach(cb => {
+                if (!cb.checked) cb.disabled = count >= 5;
+            });
+
+            // Karten visuell hervorheben
+            document.querySelectorAll('.char-card').forEach(card => {
+                const cb = card.querySelector('.char-checkbox');
+                if (!cb) return;
+                card.style.borderColor = cb.checked ? '#fbbf24' : '';
+                card.style.background  = cb.checked ? 'rgba(251,191,36,0.08)' : '';
+            });
+        }
+
+        document.querySelectorAll('.char-checkbox').forEach(cb => {
+            cb.addEventListener('change', updateCharCount);
+        });
+
+        updateCharCount(); // Einmal beim Laden aufrufen
+
+    });
+</script>
