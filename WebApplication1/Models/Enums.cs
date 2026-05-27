@@ -3,7 +3,8 @@ namespace WebApplication1.Models
     public enum CharacterType
     {
         Player,
-        NPC
+        NPC,
+        Enemy
     }
 
     public enum WeaponType

@@ -1,7 +1,186 @@
 @page
+@model Tab4Model
+
 @{
-    ViewData["Title"] = "Tab 4";
+    ViewData["Title"] = "Weltenguide";
 }
 
-<h1>Registerkarte 4</h1>
-<p>Inhalt für Registerkarte 4.</p>
+<a href="#main-content"
+   class="sr-only sr-only-focusable btn btn-primary position-absolute"
+   style="top: -40px; left: 6px; z-index: 1000;">
+    Zum Hauptinhalt springen
+</a>
+
+<main id="main-content">
+
+    <!-- HEADER -->
+    <header class="text-center py-4 mb-5" role="banner">
+
+        <h1>
+           🌍 
+            <span class="sr-only">
+                Weltenguide -
+            </span>
+
+        </h1>
+
+        <p style="color: rgba(251, 191, 36, 0.7); font-size: 1.1rem;">
+            Umfassende Übersicht aller Völker, Religionen, Regionen und Sprachen.
+        </p>
+
+    </header>
+
+    <!-- NAVIGATION -->
+    <section class="card mb-5"
+             aria-labelledby="navigation-heading">
+
+        <div class="card-header">
+            <h2 id="navigation-heading"
+                class="mb-0 h5">
+                Navigation
+            </h2>
+        </div>
+
+        <div class="card-body">
+
+            <nav class="d-flex flex-wrap gap-2"
+                 aria-label="Weltenguide Navigation">
+
+                <a href="#voelker"
+                   class="btn btn-outline-primary">
+                    👥 Völker
+                </a>
+
+                <a href="#sprachen"
+                   class="btn btn-outline-primary">
+                    🗣️ Sprachen
+                </a>
+
+                <a href="#religionen"
+                   class="btn btn-outline-primary">
+                    ⛪ Religionen
+                </a>
+
+                <a href="#regionen"
+                   class="btn btn-outline-primary">
+                    🗺️ Regionen
+                </a>
+
+            </nav>
+
+        </div>
+
+    </section>
+
+    <!-- SUCHE -->
+    <section class="card mb-5">
+
+        <div class="card-header">
+            <h2 class="mb-0 h5">
+                Suche
+            </h2>
+        </div>
+
+        <div class="card-body">
+
+            <label for="searchInput"
+                   class="form-label">
+                Welt durchsuchen
+            </label>
+
+            <input type="text"
+                   id="searchInput"
+                   class="form-control"
+                   placeholder="Nach Volk, Region oder Sprache suchen..." />
+
+        </div>
+
+    </section>
+
+    <!-- VÖLKER -->
+    <section id="voelker"
+             class="card mb-5"
+             aria-labelledby="voelker-heading">
+
+        <div class="card-header">
+            <h2 id="voelker-heading"
+                class="mb-0 h5">
+
+                👥 Die Völker der Welt
+
+            </h2>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row g-4">
+
+                @foreach (var people in Model.Peoples)
+                {
+                    <div class="col-xl-6 col-lg-12">
+
+                        <article class="card h-100 border-secondary">
+
+                            <div class="card-body">
+
+                                <div class="d-flex align-items-start gap-3 mb-3">
+
+                                    <div style="font-size: 2rem;">
+                                        @people.Icon
+                                    </div>
+
+                                    <div>
+                                        <h3 class="h4 mb-1">
+                                            @people.Name
+                                        </h3>
+
+                                        <div class="text-muted">
+                                            @people.Subtitle
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="mb-2">
+                                    <strong>Spezies:</strong>
+                                    @people.Species
+                                </div>
+
+                                <div class="mb-2">
+                                    <strong>Religion:</strong>
+
+                                    <span class="badge bg-warning text-dark">
+                                        @people.Religion
+                                    </span>
+                                </div>
+
+                                <div class="mb-2">
+                                    <strong>Herkunft:</strong>
+                                    @people.Origin
+                                </div>
+
+                                <div class="mb-2">
+                                    <strong>Sprache:</strong>
+                                    @people.Language
+                                </div>
+
+                                <hr />
+
+                                <p class="mb-0">
+                                    @people.Description
+                                </p>
+
+                            </div>
+
+                        </article>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>

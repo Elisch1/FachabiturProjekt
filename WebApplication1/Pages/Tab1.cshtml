@@ -22,203 +22,8 @@
         </div>
     </header>
 
-    <!-- Character Form Card -->
-    <section class="card mb-5" aria-labelledby="form-heading">
-        <div class="card-header">
-            <h2 id="form-heading" class="mb-0 h5">
-                @(isEditing ? "Charakter bearbeiten" : "Neuen Charakter erstellen")
-                <span class="sr-only">@(isEditing ? " - Bearbeitungsmodus" : " - Erstellungsmodus")</span>
-            </h2>
-        </div>
-        <div class="card-body">
-            <form method="post" enctype="multipart/form-data" aria-describedby="form-description">
-                <div id="form-description" class="sr-only">
-                    Fülle das Formular aus, um @(isEditing ? "einen bestehenden Charakter zu bearbeiten" : "einen neuen Charakter zu erstellen").
-                    Alle Felder mit Sternchen sind Pflichtfelder.
-                </div>
-
-                @if (isEditing)
-                {
-                    <input type="hidden" name="NewCharacter.Id" value="@(Model.NewCharacter?.Id ?? 0)" aria-hidden="true" />
-                }
-                <input type="hidden" name="NewCharacter.Level" value="@(Model.NewCharacter?.Level ?? 1)" />
-
-                <!-- Basic Info Row -->
-                <fieldset class="mb-4">
-                    <legend class="sr-only">Grundlegende Charakterinformationen</legend>
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="newCharacter_FirstName" class="form-label">
-                                    <span aria-hidden="true">👤</span> Vorname <span class="text-danger" aria-label="erforderlich">*</span>
-                                </label>
-                                <input type="text" class="form-control" id="newCharacter_FirstName"
-                                       name="NewCharacter.FirstName" value="@Model.NewCharacter?.FirstName"
-                                       placeholder="z.B. Aragorn" required
-                                       aria-describedby="firstname-help" />
-                                <div id="firstname-help" class="form-text sr-only">
-                                    Gib den Vornamen deines Charakters ein. Dieses Feld ist erforderlich.
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="newCharacter_LastName" class="form-label">
-                                    <span aria-hidden="true">👤</span> Nachname <span class="text-danger" aria-label="erforderlich">*</span>
-                                </label>
-                                <input type="text" class="form-control" id="newCharacter_LastName"
-                                       name="NewCharacter.LastName" value="@Model.NewCharacter?.LastName"
-                                       placeholder="z.B. Strider" required
-                                       aria-describedby="lastname-help" />
-                                <div id="lastname-help" class="form-text sr-only">
-                                    Gib den Nachnamen deines Charakters ein. Dieses Feld ist erforderlich.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-
-                <!-- Age and Type Info Row -->
-                <fieldset class="mb-4">
-                    <legend class="sr-only">Zusätzliche Charakterdetails</legend>
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="newCharacter_Age" class="form-label">
-                                    <span aria-hidden="true">📅</span> Alter
-                                </label>
-                                <input type="number" class="form-control" id="newCharacter_Age"
-                                       name="NewCharacter.Age" value="@Model.NewCharacter?.Age"
-                                       min="1" placeholder="z.B. 30"
-                                       aria-describedby="age-help" />
-                                <div id="age-help" class="form-text sr-only">
-                                    Gib das Alter deines Charakters in Jahren ein. Optional.
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="newCharacter_Type" class="form-label">
-                                    <span aria-hidden="true">⚔️</span> Charaktertyp
-                                </label>
-                                <select class="form-select" id="newCharacter_Type" name="NewCharacter.Type"
-                                        aria-describedby="type-help">
-                                    <option value="">-- Wähle einen Typ --</option>
-                                    <option value="Player" selected="@(Model.NewCharacter?.Type.ToString() == "Player")">Spielercharakter</option>
-                                    <option value="NPC" selected="@(Model.NewCharacter?.Type.ToString() == "NPC")">NPC (Nicht-Spieler-Charakter)</option>
-                                    <option value="Enemy" selected="@(Model.NewCharacter?.Type.ToString() == "Enemy")">Gegner</option>
-                                </select>
-                                <div id="type-help" class="form-text sr-only">
-                                    Wähle den Typ deines Charakters aus der Liste.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-
-                <!-- Description -->
-                <div class="mb-4">
-                    <label for="newCharacter_Description" class="form-label">
-                        <span aria-hidden="true">📝</span> Beschreibung
-                    </label>
-                    <textarea class="form-control" id="newCharacter_Description"
-                              name="NewCharacter.Description" rows="4"
-                              placeholder="Beschreibe deinen Charakter..."
-                              aria-describedby="description-help">@Model.NewCharacter?.Description</textarea>
-                    <div id="description-help" class="form-text sr-only">
-                        Gib eine optionale Beschreibung deines Charakters ein.
-                    </div>
-                </div>
-
-                <!-- Attributes Section -->
-                <fieldset class="mb-4">
-                    <legend class="form-label">
-                        <span aria-hidden="true">⚡</span> Attribute
-                    </legend>
-                    <p class="form-text">Verteile <span id="total-points">20</span> Punkte auf die Attribute. Verbleibende Punkte: <span id="remaining-points">20</span></p>
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label for="strength" class="form-label">Kraft</label>
-                            <input type="number" class="form-control attribute-input" id="strength" name="NewCharacter.Strength" value="@Model.NewCharacter?.Strength" min="0" />
-                        </div>
-                        <div class="col-md-4">
-                            <label for="precision" class="form-label">Präzision</label>
-                            <input type="number" class="form-control attribute-input" id="precision" name="NewCharacter.Precision" value="@Model.NewCharacter?.Precision" min="0" />
-                        </div>
-                        <div class="col-md-4">
-                            <label for="agility" class="form-label">Beweglichkeit</label>
-                            <input type="number" class="form-control attribute-input" id="agility" name="NewCharacter.Agility" value="@Model.NewCharacter?.Agility" min="0" />
-                        </div>
-                        <div class="col-md-4">
-                            <label for="intelligence" class="form-label">Intelligenz</label>
-                            <input type="number" class="form-control attribute-input" id="intelligence" name="NewCharacter.Intelligence" value="@Model.NewCharacter?.Intelligence" min="0" />
-                        </div>
-                        <div class="col-md-4">
-                            <label for="perception" class="form-label">Wahrnehmung</label>
-                            <input type="number" class="form-control attribute-input" id="perception" name="NewCharacter.Perception" value="@Model.NewCharacter?.Perception" min="0" />
-                        </div>
-                        <div class="col-md-4">
-                            <label for="custom1-name" class="form-label">Freies Attribut 1</label>
-                            <input type="text" class="form-control" id="custom1-name" name="NewCharacter.CustomAttribute1Name" value="@Model.NewCharacter?.CustomAttribute1Name" placeholder="Name" />
-                            <input type="number" class="form-control attribute-input mt-1" id="custom1-value" name="NewCharacter.CustomAttribute1Value" value="@Model.NewCharacter?.CustomAttribute1Value" min="0" />
-                        </div>
-                        <div class="col-md-4">
-                            <label for="custom2-name" class="form-label">Freies Attribut 2</label>
-                            <input type="text" class="form-control" id="custom2-name" name="NewCharacter.CustomAttribute2Name" value="@Model.NewCharacter?.CustomAttribute2Name" placeholder="Name" />
-                            <input type="number" class="form-control attribute-input mt-1" id="custom2-value" name="NewCharacter.CustomAttribute2Value" value="@Model.NewCharacter?.CustomAttribute2Value" min="0" />
-                        </div>
-                    </div>
-                </fieldset>
-
-                <!-- Profile Image -->
-                <fieldset class="mb-4">
-                    <legend class="form-label">
-                        <span aria-hidden="true">🖼️</span> Profilbild
-                    </legend>
-                    <div class="input-group">
-                        <input type="file" class="form-control" name="UploadImage" accept="image/*"
-                               placeholder="Bild hochladen" aria-describedby="image-help image-format" />
-                        <span class="input-group-text" id="image-format" style="background: rgba(217, 119, 6, 0.1); border-color: var(--border-color);">
-                            Nur Bilder
-                        </span>
-                    </div>
-                    <div id="image-help" class="form-text sr-only">
-                        Optional: Lade ein Profilbild für deinen Charakter hoch. Akzeptierte Formate: Bilder.
-                    </div>
-                    @if (!string.IsNullOrEmpty(Model.NewCharacter?.ProfileImagePath))
-                    {
-                        <div class="mt-3" role="img" aria-label="Aktuelles Profilbild des Charakters">
-                            <img src="@Model.NewCharacter.ProfileImagePath" alt="Aktuelles Profilbild von @(Model.NewCharacter?.FirstName) @(Model.NewCharacter?.LastName)"
-                                 class="img-thumbnail" style="max-width: 150px; max-height: 150px;" />
-                        </div>
-                    }
-                </fieldset>
-
-                <!-- Submit Buttons -->
-                <div class="btn-group" role="group" aria-label="Formularaktionen">
-                    <button type="submit" class="btn btn-success" aria-describedby="submit-help">
-                        <span aria-hidden="true">@(isEditing ? "✓" : "✓")</span>
-                        @(isEditing ? "Änderungen speichern" : "Charakter erstellen")
-                    </button>
-                    @if (isEditing)
-                    {
-                        <a href="/Tab1" class="btn btn-secondary" aria-describedby="cancel-help">
-                            <span aria-hidden="true">✕</span> Abbrechen
-                        </a>
-                    }
-                </div>
-                <div id="submit-help" class="sr-only">
-                    Klicke hier, um @(isEditing ? "die Änderungen zu speichern" : "den neuen Charakter zu erstellen").
-                </div>
-                <div id="cancel-help" class="sr-only">
-                    Klicke hier, um die Bearbeitung abzubrechen und zur Übersicht zurückzukehren.
-                </div>
-            </form>
-        </div>
-    </section>
-
     <!-- Existing Characters Section -->
-    <section aria-labelledby="characters-heading">
+    <section aria-labelledby="characters-heading" class="mb-5">
         <h2 id="characters-heading">
             <span aria-hidden="true">📚</span> Vorhandene Charaktere
             <span class="badge bg-secondary ms-2" aria-label="@Model.Characters.Count Charaktere">@Model.Characters.Count</span>
@@ -336,13 +141,364 @@
                     <span aria-hidden="true">✨</span> Noch keine Charaktere vorhanden.
                 </p>
                 <p style="margin: 0.5rem 0 0; color: rgba(226, 232, 240, 0.7);" aria-describedby="empty-help">
-                    Erstelle oben einen neuen Charakter, um zu starten!
+                    Erstelle unten einen neuen Charakter, um zu starten!
                 </p>
                 <div id="empty-help" class="sr-only">
-                    Verwende das Formular oben auf dieser Seite, um deinen ersten Charakter zu erstellen.
+                    Verwende das Formular weiter unten auf dieser Seite, um deinen ersten Charakter zu erstellen.
                 </div>
             </div>
         }
+    </section>
+
+    <!-- Character Form Card -->
+    <section class="card mb-5" aria-labelledby="form-heading">
+        <div class="card-header">
+            <h2 id="form-heading" class="mb-0 h5">
+                @(isEditing ? "Charakter bearbeiten" : "Neuen Charakter erstellen")
+                <span class="sr-only">@(isEditing ? " - Bearbeitungsmodus" : " - Erstellungsmodus")</span>
+            </h2>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data" aria-describedby="form-description">
+                <div id="form-description" class="sr-only">
+                    Fülle das Formular aus, um @(isEditing ? "einen bestehenden Charakter zu bearbeiten" : "einen neuen Charakter zu erstellen").
+                    Alle Felder mit Sternchen sind Pflichtfelder.
+                </div>
+
+                @if (isEditing)
+                {
+                    <input type="hidden" name="NewCharacter.Id" value="@(Model.NewCharacter?.Id ?? 0)" aria-hidden="true" />
+                }
+                <input type="hidden" name="NewCharacter.Level" value="@(Model.NewCharacter?.Level ?? 1)" />
+
+                <!-- Basic Info Row -->
+                <fieldset class="mb-4">
+                    <legend class="sr-only">Grundlegende Charakterinformationen</legend>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="newCharacter_FirstName" class="form-label">
+                                    <span aria-hidden="true">👤</span> Vorname <span class="text-danger" aria-label="erforderlich">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="newCharacter_FirstName"
+                                       name="NewCharacter.FirstName" value="@Model.NewCharacter?.FirstName"
+                                       placeholder="z.B. Aragorn" required
+                                       aria-describedby="firstname-help" />
+                                <div id="firstname-help" class="form-text sr-only">
+                                    Gib den Vornamen deines Charakters ein. Dieses Feld ist erforderlich.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="newCharacter_LastName" class="form-label">
+                                    <span aria-hidden="true">👤</span> Nachname <span class="text-danger" aria-label="erforderlich">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="newCharacter_LastName"
+                                       name="NewCharacter.LastName" value="@Model.NewCharacter?.LastName"
+                                       placeholder="z.B. Strider" required
+                                       aria-describedby="lastname-help" />
+                                <div id="lastname-help" class="form-text sr-only">
+                                    Gib den Nachnamen deines Charakters ein. Dieses Feld ist erforderlich.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Age and Type Info Row -->
+                <fieldset class="mb-4">
+                    <legend class="sr-only">Zusätzliche Charakterdetails</legend>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="newCharacter_Age" class="form-label">
+                                    <span aria-hidden="true">📅</span> Alter
+                                </label>
+                                <input type="number" class="form-control" id="newCharacter_Age"
+                                       name="NewCharacter.Age" value="@Model.NewCharacter?.Age"
+                                       min="1" placeholder="z.B. 30"
+                                       aria-describedby="age-help" />
+                                <div id="age-help" class="form-text sr-only">
+                                    Gib das Alter deines Charakters in Jahren ein. Optional.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="newCharacter_Type" class="form-label">
+                                    <span aria-hidden="true">⚔️</span> Charaktertyp
+                                </label>
+                                <select class="form-select" id="newCharacter_Type" name="NewCharacter.Type"
+                                        aria-describedby="type-help">
+                                    <option value="">-- Wähle einen Typ --</option>
+                                    <option value="Player" selected="@(Model.NewCharacter?.Type.ToString() == "Player")">Spielercharakter</option>
+                                    <option value="NPC" selected="@(Model.NewCharacter?.Type.ToString() == "NPC")">NPC (Nicht-Spieler-Charakter)</option>
+                                    <option value="Enemy" selected="@(Model.NewCharacter?.Type.ToString() == "Enemy")">Gegner</option>
+                                </select>
+                                <div id="type-help" class="form-text sr-only">
+                                    Wähle den Typ deines Charakters aus der Liste.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Description -->
+                <div class="mb-4">
+                    <label for="newCharacter_Description" class="form-label">
+                        <span aria-hidden="true">📝</span> Beschreibung
+                    </label>
+                    <textarea class="form-control" id="newCharacter_Description"
+                              name="NewCharacter.Description" rows="4"
+                              placeholder="Beschreibe deinen Charakter..."
+                              aria-describedby="description-help">@Model.NewCharacter?.Description</textarea>
+                    <div id="description-help" class="form-text sr-only">
+                        Gib eine optionale Beschreibung deines Charakters ein.
+                    </div>
+                </div>
+
+                <!-- Attributes Section -->
+                <fieldset class="mb-4">
+                    <legend class="form-label">
+                        <span aria-hidden="true">⚡</span> Attribute
+                    </legend>
+                    <p class="form-text">Verteile <span id="total-points">20</span> Punkte auf die Attribute. Verbleibende Punkte: <span id="remaining-points" class="highlight-number">20</span></p>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="strength" class="form-label">Kraft</label>
+                            <input type="number" class="form-control attribute-input" id="strength" name="NewCharacter.Strength" value="@Model.NewCharacter?.Strength" min="0" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="precision" class="form-label">Präzision</label>
+                            <input type="number" class="form-control attribute-input" id="precision" name="NewCharacter.Precision" value="@Model.NewCharacter?.Precision" min="0" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="agility" class="form-label">Beweglichkeit</label>
+                            <input type="number" class="form-control attribute-input" id="agility" name="NewCharacter.Agility" value="@Model.NewCharacter?.Agility" min="0" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="intelligence" class="form-label">Intelligenz</label>
+                            <input type="number" class="form-control attribute-input" id="intelligence" name="NewCharacter.Intelligence" value="@Model.NewCharacter?.Intelligence" min="0" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="perception" class="form-label">Wahrnehmung</label>
+                            <input type="number" class="form-control attribute-input" id="perception" name="NewCharacter.Perception" value="@Model.NewCharacter?.Perception" min="0" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="custom1-name" class="form-label">Freies Attribut 1</label>
+                            <input type="text" class="form-control" id="custom1-name" name="NewCharacter.CustomAttribute1Name" value="@Model.NewCharacter?.CustomAttribute1Name" placeholder="Name" />
+                            <input type="number" class="form-control attribute-input mt-1" id="custom1-value" name="NewCharacter.CustomAttribute1Value" value="@Model.NewCharacter?.CustomAttribute1Value" min="0" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="custom2-name" class="form-label">Freies Attribut 2</label>
+                            <input type="text" class="form-control" id="custom2-name" name="NewCharacter.CustomAttribute2Name" value="@Model.NewCharacter?.CustomAttribute2Name" placeholder="Name" />
+                            <input type="number" class="form-control attribute-input mt-1" id="custom2-value" name="NewCharacter.CustomAttribute2Value" value="@Model.NewCharacter?.CustomAttribute2Value" min="0" />
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Abilities Section -->
+                <fieldset class="mb-4">
+                    <legend class="form-label">
+                        <span aria-hidden="true">🏷️</span> Fähigkeiten
+                    </legend>
+                    <p class="form-text">Du hast <strong id="ability-total">200</strong> Fähigkeitspunkte. Erste Sprache ist kostenlos, jede weitere Sprache kostet 30 Punkte. Wissen, Handwerk, Bewegung und Sicht kosten jeweils 20 Punkte. Upgrade kostet 10 Punkte pro Stufe.</p>
+                    <div class="mb-3">
+                        <!-- Anzeige der Fähigkeitspunkte mit klarer Trennung zwischen verwendeten und verbleibenden Punkten -->
+                        <span class="form-text">Verwendet: <span id="ability-used" class="highlight-number">0</span></span>
+                        <span class="form-text">Verbleibend: <span id="ability-remaining" class="highlight-number" >200</span></span>
+                    </div>
+                    <div class="form-text">Hover über eine Fähigkeit, um die Beschreibung zu sehen.</div>
+                    <div class="row g-2" id="abilities-container">
+                        <div class="col-12">
+                            <div class="d-flex flex-wrap gap-2">
+                                <div class="ability-card" data-ability-id="1" data-category="Sprache" data-level="1">
+                                    <button type="button" class="btn btn-outline-primary ability-tag" data-category="Sprache" title="Menschen, Weltsprache: sanft, melodisch, langer Vokale und fließender Silben.">Thûravin</button>
+                                    <div class="ability-controls d-none mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-decrease">-</button>
+                                        <span class="form-text">Stufe <span class="ability-level-display ability-number">1</span></span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-increase">+</button>
+                                        <span class="form-text ability-cost">0 P</span>
+                                    </div>
+                                </div>
+                                <div class="ability-card" data-ability-id="2" data-category="Sprache" data-level="1">
+                                    <button type="button" class="btn btn-outline-primary ability-tag" data-category="Sprache" title="Orkstämme, Goblins, Trolle: gutturale Laute, harte Konsonanten, viele Knacklaute.">Grugharz</button>
+                                    <div class="ability-controls d-none mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-decrease">-</button>
+                                        <span class="form-text">Stufe <span class="ability-level-display ability-number">1</span></span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-increase">+</button>
+                                        <span class="form-text ability-cost">30 P</span>
+                                    </div>
+                                </div>
+                                <div class="ability-card" data-ability-id="3" data-category="Sprache" data-level="1">
+                                    <button type="button" class="btn btn-outline-primary ability-tag" data-category="Sprache" title="Waldelfen, Druiden, Feenwesen: flüsternd, zwitschernd, mit vogelähnlicher Rhythmik.">Sylvenari</button>
+                                    <div class="ability-controls d-none mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-decrease">-</button>
+                                        <span class="form-text">Stufe <span class="ability-level-display ability-number">1</span></span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-increase">+</button>
+                                        <span class="form-text ability-cost">30 P</span>
+                                    </div>
+                                </div>
+                                <div class="ability-card" data-ability-id="4" data-category="Sprache" data-level="1">
+                                    <button type="button" class="btn btn-outline-primary ability-tag" data-category="Sprache" title="Zwerge, Schmiedemeister, Bergvölker: tiefe, raue Stimme, viele ‚r‘- und ‚s‘-Laute, kurzsibilig.">Korgund</button>
+                                    <div class="ability-controls d-none mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-decrease">-</button>
+                                        <span class="form-text">Stufe <span class="ability-level-display ability-number">1</span></span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-increase">+</button>
+                                        <span class="form-text ability-cost">30 P</span>
+                                    </div>
+                                </div>
+                                <div class="ability-card" data-ability-id="5" data-category="Sprache" data-level="1">
+                                    <button type="button" class="btn btn-outline-primary ability-tag" data-category="Sprache" title="Nomaden der Wüste, Sandhexen, Händlerclans: Klicklaute, weiche Vokale, betonte Rhythmik, häufige Wiederholungen.">Ishéka</button>
+                                    <div class="ability-controls d-none mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-decrease">-</button>
+                                        <span class="form-text">Stufe <span class="ability-level-display ability-number">1</span></span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-increase">+</button>
+                                        <span class="form-text ability-cost">30 P</span>
+                                    </div>
+                                </div>
+                                <div class="ability-card" data-ability-id="6" data-category="Sprache" data-level="1">
+                                    <button type="button" class="btn btn-outline-primary ability-tag" data-category="Sprache" title="Untote, Schattenwesen, Kultisten: heiser, zerrackt, vokalarm, klirrend – wie flüstern aus dem Grab.">Voen'kar</button>
+                                    <div class="ability-controls d-none mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-decrease">-</button>
+                                        <span class="form-text">Stufe <span class="ability-level-display ability-number">1</span></span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-increase">+</button>
+                                        <span class="form-text ability-cost">30 P</span>
+                                    </div>
+                                </div>
+                                <div class="ability-card" data-ability-id="7" data-category="Sprache" data-level="1">
+                                    <button type="button" class="btn btn-outline-primary ability-tag" data-category="Sprache" title="Drachen, alte Imperatoren, Zauberer uralter Schulen: sibilant, ritualistisch, mit betonten Zischlauten und Dreisilbern.">Izzethian</button>
+                                    <div class="ability-controls d-none mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-decrease">-</button>
+                                        <span class="form-text">Stufe <span class="ability-level-display ability-number">1</span></span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-increase">+</button>
+                                        <span class="form-text ability-cost">30 P</span>
+                                    </div>
+                                </div>
+                                <div class="ability-card" data-ability-id="8" data-category="Handwerk" data-level="1">
+                                    <button type="button" class="btn btn-outline-primary ability-tag" data-category="Handwerk" title="Öffnet Schlösser mit Dietrichen oder Improvisation.">Schlösser knacken</button>
+                                    <div class="ability-controls d-none mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-decrease">-</button>
+                                        <span class="form-text">Stufe <span class="ability-level-display ability-number">1</span></span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-increase">+</button>
+                                        <span class="form-text ability-cost">20 P</span>
+                                    </div>
+                                </div>
+                                <div class="ability-card" data-ability-id="9" data-category="Wissen" data-level="1">
+                                    <button type="button" class="btn btn-outline-primary ability-tag" data-category="Wissen" title="Mischt Tränke, Gifte, Heilmittel.">Alchemie</button>
+                                    <div class="ability-controls d-none mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-decrease">-</button>
+                                        <span class="form-text">Stufe <span class="ability-level-display ability-number">1</span></span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-increase">+</button>
+                                        <span class="form-text ability-cost">20 P</span>
+                                    </div>
+                                </div>
+                                <div class="ability-card" data-ability-id="10" data-category="Handwerk" data-level="1">
+                                    <button type="button" class="btn btn-outline-primary ability-tag" data-category="Handwerk" title="Bearbeitet Metallwaffen, Rüstungen und Werkzeuge.">Schmiedekunst</button>
+                                    <div class="ability-controls d-none mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-decrease">-</button>
+                                        <span class="form-text">Stufe <span class="ability-level-display ability-number">1</span></span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-increase">+</button>
+                                        <span class="form-text ability-cost">20 P</span>
+                                    </div>
+                                </div>
+                                <div class="ability-card" data-ability-id="11" data-category="Handwerk" data-level="1">
+                                    <button type="button" class="btn btn-outline-primary ability-tag" data-category="Handwerk" title="Bau von Möbeln, Hütten, Schiffen, Belagerungsgerät.">Zimmermannskunst</button>
+                                    <div class="ability-controls d-none mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-decrease">-</button>
+                                        <span class="form-text">Stufe <span class="ability-level-display ability-number">1</span></span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-increase">+</button>
+                                        <span class="form-text ability-cost">20 P</span>
+                                    </div>
+                                </div>
+                                <div class="ability-card" data-ability-id="12" data-category="Wissen" data-level="1">
+                                    <button type="button" class="btn btn-outline-primary ability-tag" data-category="Wissen" title="Behandlung von Wunden, Krankheiten, Vergiftungen.">Heilkunde</button>
+                                    <div class="ability-controls d-none mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-decrease">-</button>
+                                        <span class="form-text">Stufe <span class="ability-level-display ability-number">1</span></span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-increase">+</button>
+                                        <span class="form-text ability-cost">20 P</span>
+                                    </div>
+                                </div>
+                                <div class="ability-card" data-ability-id="13" data-category="Bewegung" data-level="1">
+                                    <button type="button" class="btn btn-outline-primary ability-tag" data-category="Bewegung" title="Bewegung im Wasser.">Schwimmen</button>
+                                    <div class="ability-controls d-none mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-decrease">-</button>
+                                        <span class="form-text">Stufe <span class="ability-level-display ability-number">1</span></span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-increase">+</button>
+                                        <span class="form-text ability-cost">20 P</span>
+                                    </div>
+                                </div>
+                                <div class="ability-card" data-ability-id="14" data-category="Sicht" data-level="1">
+                                    <button type="button" class="btn btn-outline-primary ability-tag" data-category="Sicht" title="Aufspüren durch hinterlassende Spuren.">Fährtenlesen</button>
+                                    <div class="ability-controls d-none mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-decrease">-</button>
+                                        <span class="form-text">Stufe <span class="ability-level-display ability-number">1</span></span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-increase">+</button>
+                                        <span class="form-text ability-cost">20 P</span>
+                                    </div>
+                                </div> 
+                                <div class="ability-card" data-ability-id="15" data-category="Sicht" data-level="1">
+                                    <button type="button" class="btn btn-outline-primary ability-tag" data-category="Sicht" title="Looten von z.B. Leichen und Kisten.">Plündern</button>
+                                    <div class="ability-controls d-none mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-decrease">-</button>
+                                        <span class="form-text">Stufe <span class="ability-level-display ability-number">1</span></span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ability-increase">+</button>
+                                        <span class="form-text ability-cost">20 P</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="SelectedAbilities" id="SelectedAbilities" value="" />
+                </fieldset>
+
+                <!-- Profile Image -->
+                <fieldset class="mb-4">
+                    <legend class="form-label">
+                        <span aria-hidden="true">🖼️</span> Profilbild
+                    </legend>
+                    <div class="input-group">
+                        <input type="file" class="form-control" name="UploadImage" accept="image/*"
+                               placeholder="Bild hochladen" aria-describedby="image-help image-format" />
+                        <span class="input-group-text" id="image-format" style="background: rgba(217, 119, 6, 0.1); border-color: var(--border-color);">
+                            Nur Bilder
+                        </span>
+                    </div>
+                    <div id="image-help" class="form-text sr-only">
+                        Optional: Lade ein Profilbild für deinen Charakter hoch. Akzeptierte Formate: Bilder.
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.NewCharacter?.ProfileImagePath))
+                    {
+                        <div class="mt-3" role="img" aria-label="Aktuelles Profilbild des Charakters">
+                            <img src="@Model.NewCharacter.ProfileImagePath" alt="Aktuelles Profilbild von @(Model.NewCharacter?.FirstName) @(Model.NewCharacter?.LastName)"
+                                 class="img-thumbnail" style="max-width: 150px; max-height: 150px;" />
+                        </div>
+                    }
+                </fieldset>
+
+                <!-- Submit Buttons -->
+                <div class="btn-group" role="group" aria-label="Formularaktionen">
+                    <button type="submit" class="btn btn-success" aria-describedby="submit-help">
+                        <span aria-hidden="true">@(isEditing ? "✓" : "✓")</span>
+                        @(isEditing ? "Änderungen speichern" : "Charakter erstellen")
+                    </button>
+                    @if (isEditing)
+                    {
+                        <a href="/Tab1" class="btn btn-secondary" aria-describedby="cancel-help">
+                            <span aria-hidden="true">✕</span> Abbrechen
+                        </a>
+                    }
+                </div>
+                <div id="submit-help" class="sr-only">
+                    Klicke hier, um @(isEditing ? "die Änderungen zu speichern" : "den neuen Charakter zu erstellen").
+                </div>
+                <div id="cancel-help" class="sr-only">
+                    Klicke hier, um die Bearbeitung abzubrechen und zur Übersicht zurückzukehren.
+                </div>
+            </form>
+        </div>
     </section>
 </main>
 
@@ -351,11 +507,141 @@
         const attributeInputs = document.querySelectorAll('.attribute-input');
         const remainingPointsSpan = document.getElementById('remaining-points');
         const totalPointsSpan = document.getElementById('total-points');
+        const abilityCards = document.querySelectorAll('.ability-card');
+        const abilityUsedSpan = document.getElementById('ability-used');
+        const abilityRemainingSpan = document.getElementById('ability-remaining');
+        const selectedAbilitiesInput = document.getElementById('SelectedAbilities');
         const levelInput = document.querySelector('input[name="NewCharacter.Level"]');
         let level = parseInt(levelInput.value) || 1;
         let totalPoints = 20 + (level - 1) * 3;
+        const abilityTotalPoints = 200;
 
         totalPointsSpan.textContent = totalPoints;
+
+        function calculateAbilityCost(card, languageFreeIndex) {
+            const category = card.dataset.category;
+            const abilityLevel = parseInt(card.dataset.level) || 1;
+            let baseCost = 20;
+            if (category === 'Sprache') {
+                baseCost = languageFreeIndex === 0 ? 0 : 30;
+            }
+            return baseCost + (abilityLevel - 1) * 10;
+        }
+
+        function getTotalAbilityCostAfterIncrease(cardToIncrease) {
+            const selected = Array.from(abilityCards).filter(card => card.classList.contains('selected'));
+            const selectedLanguages = selected.filter(card => card.dataset.category === 'Sprache');
+            let totalAbilityCost = 0;
+
+            selected.forEach(card => {
+                let abilityLevel = parseInt(card.dataset.level) || 1;
+                
+                // Temporär erhöhen für die Berechnung
+                if (card === cardToIncrease) {
+                    abilityLevel += 1;
+                }
+                
+                const category = card.dataset.category;
+                let baseCost = 20;
+                if (category === 'Sprache') {
+                    const languageIndex = selectedLanguages.indexOf(card);
+                    baseCost = languageIndex === 0 ? 0 : 30;
+                }
+                const cost = baseCost + (abilityLevel - 1) * 10;
+                totalAbilityCost += cost;
+            });
+
+            return totalAbilityCost;
+        }
+
+        function updateAbilityPoints() {
+            const selected = Array.from(abilityCards).filter(card => card.classList.contains('selected'));
+            const selectedLanguages = selected.filter(card => card.dataset.category === 'Sprache');
+            let totalAbilityCost = 0;
+
+            selected.forEach(card => {
+                const languageIndex = selectedLanguages.indexOf(card);
+                const cost = calculateAbilityCost(card, languageIndex);
+                totalAbilityCost += cost;
+                const costSpan = card.querySelector('.ability-cost');
+                if (costSpan) {
+                    costSpan.textContent = `${cost} P`;
+                }
+            });
+
+            const remaining = abilityTotalPoints - totalAbilityCost;
+            abilityUsedSpan.textContent = totalAbilityCost;
+            abilityRemainingSpan.textContent = remaining;
+            abilityRemainingSpan.style.color = remaining < 0 ? 'red' : 'inherit';
+
+            const selectedData = selected.map(card => ({
+                id: card.dataset.abilityId,
+                category: card.dataset.category,
+                level: parseInt(card.dataset.level) || 1
+            }));
+            selectedAbilitiesInput.value = JSON.stringify(selectedData);
+        }
+
+        function updateAbilityControls(card) {
+            const controls = card.querySelector('.ability-controls');
+            if (!controls) return;
+            controls.classList.toggle('d-none', !card.classList.contains('selected'));
+            const levelDisplay = card.querySelector('.ability-level-display');
+            if (levelDisplay) {
+                levelDisplay.textContent = card.dataset.level || '1';
+            }
+        }
+
+        abilityCards.forEach(card => {
+            const tag = card.querySelector('.ability-tag');
+            const decrease = card.querySelector('.ability-decrease');
+            const increase = card.querySelector('.ability-increase');
+
+            if (tag) {
+                tag.addEventListener('click', () => {
+                    card.classList.toggle('selected');
+                    if (card.classList.contains('selected')) {
+                        tag.classList.remove('btn-outline-primary');
+                        tag.classList.add('btn-primary');
+                        card.dataset.level = card.dataset.level || '1';
+                    } else {
+                        tag.classList.remove('btn-primary');
+                        tag.classList.add('btn-outline-primary');
+                        card.dataset.level = '1';
+                    }
+                    updateAbilityControls(card);
+                    updateAbilityPoints();
+                });
+            }
+
+            if (decrease) {
+                decrease.addEventListener('click', event => {
+                    event.stopPropagation();
+                    let levelValue = parseInt(card.dataset.level) || 1;
+                    if (levelValue > 1) {
+                        levelValue -= 1;
+                        card.dataset.level = levelValue.toString();
+                        updateAbilityControls(card);
+                        updateAbilityPoints();
+                    }
+                });
+            }
+
+            if (increase) {
+                increase.addEventListener('click', event => {
+                    event.stopPropagation();
+                    const newTotalCost = getTotalAbilityCostAfterIncrease(card);
+                    
+                    if (newTotalCost <= abilityTotalPoints) {
+                        let levelValue = parseInt(card.dataset.level) || 1;
+                        levelValue += 1;
+                        card.dataset.level = levelValue.toString();
+                        updateAbilityControls(card);
+                        updateAbilityPoints();
+                    }
+                });
+            }
+        });
 
         function updateRemainingPoints() {
             let sum = 0;
@@ -380,5 +666,6 @@
 
         // Initial calculation
         updateRemainingPoints();
+        updateAbilityPoints();
     });
 </script>

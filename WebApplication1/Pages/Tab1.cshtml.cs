@@ -45,6 +45,7 @@ namespace WebApplication1.Pages
                 return Page();
             }
 
+            Character? existing = null;
             if (NewCharacter.Id == 0)
             {
                 // Create
@@ -55,7 +56,7 @@ namespace WebApplication1.Pages
             else
             {
                 // Update
-                var existing = _db.Characters.FirstOrDefault(c => c.Id == NewCharacter.Id);
+                existing = _db.Characters.FirstOrDefault(c => c.Id == NewCharacter.Id);
                 if (existing != null)
                 {
                     existing.FirstName = NewCharacter.FirstName;
@@ -92,7 +93,17 @@ namespace WebApplication1.Pages
                     UploadImage.CopyTo(stream);
                 }
 
-                NewCharacter.ProfileImagePath = "/uploads/" + fileName;
+                // If we updated an existing character, set the path on the tracked entity,
+                // otherwise set it on the new character instance so it gets saved.
+                var profilePath = "/uploads/" + fileName;
+                if (existing != null)
+                {
+                    existing.ProfileImagePath = profilePath;
+                }
+                else
+                {
+                    NewCharacter.ProfileImagePath = profilePath;
+                }
             }
 
             _db.SaveChanges();

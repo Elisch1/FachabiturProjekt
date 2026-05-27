@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApplication1.Models;
 
@@ -10,9 +11,11 @@ using WebApplication1.Models;
 namespace WebApplication1.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260513094432_AddNachrichtToKampfLog")]
+    partial class AddNachrichtToKampfLog
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.3");
@@ -353,7 +356,7 @@ namespace WebApplication1.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("AngreiferId")
+                    b.Property<int>("AngreiferId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Damage")
@@ -372,7 +375,7 @@ namespace WebApplication1.Migrations
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("VerteidigerId")
+                    b.Property<int>("VerteidigerId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -649,7 +652,9 @@ namespace WebApplication1.Migrations
                 {
                     b.HasOne("WebApplication1.Models.Character", "Angreifer")
                         .WithMany()
-                        .HasForeignKey("AngreiferId");
+                        .HasForeignKey("AngreiferId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("WebApplication1.Models.Kampf", "Kampf")
                         .WithMany("Logs")
@@ -659,7 +664,9 @@ namespace WebApplication1.Migrations
 
                     b.HasOne("WebApplication1.Models.Character", "Verteidiger")
                         .WithMany()
-                        .HasForeignKey("VerteidigerId");
+                        .HasForeignKey("VerteidigerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Angreifer");
 
